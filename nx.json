@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "npmScope": "near-wallet-selector",
+  "npmScope": "aurora-is-near",
   "workspaceLayout": {
     "appsDir": "examples",
     "libsDir": "packages"
