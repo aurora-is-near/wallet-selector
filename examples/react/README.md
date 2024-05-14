@@ -4,6 +4,16 @@ This React example shows how to integrate Near Wallet Selector into your React a
 
 # Usage
 
+Install the dependencies:
+```bash
+yarn
+```
+
+Build the dependencies:
+```bash
+yarn nx build react
+```
+
 Start the development server:
 ```bash
 yarn nx serve react
