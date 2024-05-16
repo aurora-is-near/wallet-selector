@@ -38,7 +38,7 @@ jobs:
       # - name: Publish My Near Wallet
       #   run:  cd .. && cd ./my-near-wallet && npm pkg set name=aurora-is-near/wallet-selector/my-near-wallet &&  npm pkg set repository.url=https://github.com/aurora-is-near/wallet-selector.git && npm pkg set bugs.url=https://github.com/aurora-is-near/issues && npm pkg set homepage=https://github.com/aurora-is-near/wallet-selector/tree/main/packages/my-near-wallet && npm publish --access public 
       - name: Publish Ethereum Wallets
-        run:   cd ./dist/packages/ethereum-wallets && npm pkg set name=ethereum-wallets &&  npm pkg set repository.url=https://github.com/aurora-is-near/wallet-selector.git && npm pkg set bugs.url=https://github.com/aurora-is-near/issues && npm pkg set homepage=https://github.com/aurora-is-near/wallet-selector/tree/main/packages/ethereum-wallets && npm publish --access public 
+        run:   cd ./dist/packages/ethereum-wallets && npm pkg set name=aurora-is-near/ethereum-wallets &&  npm pkg set repository.url=https://github.com/aurora-is-near/wallet-selector.git && npm pkg set bugs.url=https://github.com/aurora-is-near/issues && npm pkg set homepage=https://github.com/aurora-is-near/wallet-selector/tree/main/packages/ethereum-wallets && npm publish --access public 
       # - name: Publish Core
       #   run:  cd ./dist/packages/core && npm pkg set name=aurora-is-near/wallet-selector/core &&  npm pkg set repository.url=https://github.com/aurora-is-near/wallet-selector.git && npm pkg set bugs.url=https://github.com/aurora-is-near/issues && npm pkg set homepage=https://github.com/aurora-is-near/wallet-selector/tree/main/packages/core && npm publish --access public 
       # - name: Publish Modal ui
