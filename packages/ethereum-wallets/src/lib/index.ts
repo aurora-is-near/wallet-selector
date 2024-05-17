@@ -4,6 +4,7 @@ import type {
   FinalExecutionOutcome,
   FunctionCallPermissionView,
 } from "near-api-js/lib/providers/provider";
+import { JsonRpcProvider } from "near-api-js/lib/providers";
 import { stringifyJsonOrBytes } from "near-api-js/lib/transaction";
 import {
   type WalletModuleFactory,
@@ -261,9 +262,10 @@ const EthereumWallets: WalletBehaviourFactory<
         }
         if (data.address && data.status === "connected") {
           if (store.getState().contract?.contractId) {
+            const address = data.address.toLowerCase();
             const keyPair = await _state.keystore.getKey(
               options.network.networkId,
-              "opa_code28.testnet" // data.address
+              devMode ? address + "." + devModeAccount : address
             );
             if (!keyPair) {
               emitter.emit("signedOut", null);
@@ -413,8 +415,7 @@ const EthereumWallets: WalletBehaviourFactory<
                   permission: {
                     receiverId: accountId,
                     allowance: "0",
-                    // methodNames: [RLP_EXECUTE],
-                    methodNames: [],
+                    methodNames: [RLP_EXECUTE],
                   },
                 },
               },
@@ -494,15 +495,24 @@ const EthereumWallets: WalletBehaviourFactory<
               renderTxs({ selectedIndex: index });
               const txHash = await executeTransaction({ tx, relayerPublicKey });
               logger.log(`Sent transaction: ${txHash}`);
-              /*
               const receipt = await waitForTransactionReceipt(wagmiConfig, {
                 hash: txHash,
                 chainId: expectedChainId,
               });
-              logger.log(receipt);
-              */
-              // TODO get the FinalExecutionOutcome of the rpc transaction
-              results.push({} as FinalExecutionOutcome);
+              logger.log("Receipt:", receipt);
+              if (receipt.status !== "success") {
+                throw new Error("Transaction execution failed.");
+              }
+              const nearProvider = new JsonRpcProvider(
+                // @ts-expect-error
+                provider.provider.connection
+              );
+              const nearTx = await nearProvider.txStatus(
+                // @ts-expect-error
+                receipt.nearTransactionHash,
+                accountLogIn.accountId
+              );
+              results.push(nearTx);
             }
             resolve();
           } catch (error) {
