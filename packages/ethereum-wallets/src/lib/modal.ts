@@ -294,7 +294,7 @@ export function createModal({
       txs.length === 1 &&
       txs[0].actions.length === 1 &&
       txs[0].actions[0].type === "AddKey"
-        ? "<h2 class='ethereum-wallet-modal-h2'>Log in</h2>"
+        ? "<h2>Log in</h2>"
         : txs.length === 1 &&
           txs[0].actions.length === 1 &&
           txs[0].actions[0].type === "DeleteKey"
@@ -485,15 +485,24 @@ export function createModal({
                     `
                     : tx.actions[0].type === "Transfer"
                     ? `
-                      <div class="ethereum-wallet-tx-info-text">
-                        <p>
-                          Transfer ${formatUnits(
+                      <dl>
+                        <div class="ethereum-wallet-tx-info-row">
+                          <dt>From</dt>
+                          <dd>${tx.signerId}</dd>
+                        </div>
+                        <div class="ethereum-wallet-tx-info-row">
+                          <dt>To</dt>
+                          <dd>${tx.receiverId}</dd>
+                        </div>
+                        <div class="ethereum-wallet-tx-info-row">
+                          <dt>Amount</dt>
+                          <dd>${formatUnits(
                             BigInt(tx.actions[0].params.deposit),
                             24
-                          )} NEAR from ${tx.signerId} to ${tx.receiverId}
-                        </p>
-                      </div>
-                        `
+                          )} NEAR</dd>
+                        </div>
+                      </dl>
+                      `
                     : `
                       <div class="ethereum-wallet-tx-info-text">
                         <p>Unknown transaction type.</p>
