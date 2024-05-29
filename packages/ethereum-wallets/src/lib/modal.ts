@@ -247,6 +247,7 @@ export function createModal({
     }
 
     .ethereum-wallet-txs-status {
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -278,6 +279,28 @@ export function createModal({
       z-index: -1;
       background-color: #DDF3E4;
       border-radius: 8px;
+    }
+
+    .ethereum-wallet-spinner {
+      position: absolute;
+      right: 14px;
+      top: 16px;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #384EAC;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+    }
+    @keyframes rotation {
+      0% {
+          transform: rotate(0deg);
+      }
+      100% {
+          transform: rotate(360deg);
+      }
     }
   `;
 
@@ -549,6 +572,7 @@ export function createModal({
                     : "Sign the transaction in your wallet..."
                 }
                 </p>
+                ${isSent ? `<div class="ethereum-wallet-spinner"></div>` : ""}
               </div>
             `
         }
