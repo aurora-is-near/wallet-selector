@@ -307,8 +307,6 @@ export function createModal({
       border: 2px solid #384EAC;
       border-bottom-color: transparent;
       border-radius: 50%;
-      display: inline-block;
-      box-sizing: border-box;
       animation: rotation 1s linear infinite;
     }
     @keyframes rotation {
