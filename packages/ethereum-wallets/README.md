@@ -7,16 +7,17 @@ Ethereum wallet support NEP: https://github.com/near/NEPs/issues/518
 
 Any Ethereum wallet can be connected via Web3Modal: the dApp can chose which wallets to support and a multichain dApp can switch networks using the same wallet connection.
 
-SignIn requires a switch to NEAR network, if the user switches to other networks he will be prompted to switch back to NEAR before a transaction is made.
+SignIn requires switching to NEAR network to ensure that the wallet is compatible, if the user switches to other networks he will be prompted to switch back to NEAR before making a transaction.
 
-Sign out prompts to remove the FunctionCall access key if there is one, this action is not blocking and the user can sign out without executing the transaction.
+Sign out prompts to remove the FunctionCall access key if there is one, this action is non blocking and the user can sign out without executing the transaction.
 
-A NEAR dApp can connect to multiple Ethereum wallet addresses. If the user switches to a new address in the Ethereum wallet, the NEAR wallet will be disconnected from the dApp so that it can reconnect with the signIn flow.
-If the dApp doesn't require a FunctionCall access key or the Ethereum wallet address already signed in, then the address connects automatically when changed.
-
-`signMessage` and `verifyOwner` are not implemented because Ethereum wallets are not compatible with these standards, instead a dApp can use `eth_sign` or `eth_signTypedData_v4` to authenticate the wallet by interacting with it directly.
+A NEAR dApp can connect to multiple Ethereum wallet addresses. If the user switches to a new address from the Ethereum wallet, the NEAR wallet will be disconnected so that it can reconnect with the signIn flow. If the dApp doesn't require a FunctionCall access key or the Ethereum wallet address already signed in, then the address connects automatically when changed.
 
 NEP-518 doesn't support multiple actions within the same transaction, so when multiple actions are requested, they are split into separate transactions and executed 1 by 1.
+
+NEP-518 rpc relayer uses a FunctionCall access key to execute transactions on behalf of the user by calling `rlp_execute`. If this key is not yet added, the wallet will be onboarded before the first transaction is made.
+
+`signMessage` and `verifyOwner` are not implemented because Ethereum wallets are not compatible with these standards, instead a dApp can use `eth_sign` or `eth_signTypedData_v4` to authenticate the wallet by interacting with it directly.
 
 ## Installation and Usage
 
@@ -79,7 +80,6 @@ Project ID is required, please obtain it from [walletconnect.com](https://wallet
 - `wagmiConfig`: Wagmi Config for interacting with Ethereum wallets.
 - `web3Modal`: Web3Modal object for connecting an Ethereum wallet and switching network.
 - `chainId` (`number?`): Chain ID of the NEAR web3 rpc to connect to. Defaults to `397` (`mainnet`) or `398` (`testnet`) depending on the `setupWalletSelector` network configuration.
-- `rpcUrl` (`string?`): Custom NEAR web3 rpc endpoint to query Ethereum wallet transaction receipts, defaults to `todo` (`mainnet`) or `todo` (`testnet`) depending on the `setupWalletSelector` network configuration.
 - `iconUrl` (`string?`): Image URL for the icon shown in the modal. This can also be a relative path or base64 encoded image. Defaults to `./assets/ethereum-wallets-icon.png`.
 - `wagmiCore` (`typeof import("@wagmi/core")?`): Optional, @wagmi/core functions can be overidden by the dapp to interract with the wallet.
 
