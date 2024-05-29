@@ -263,6 +263,22 @@ export function createModal({
       font-size: 14px;
       line-height: 20px;
     }
+
+    .ethereum-wallet-tx-highlight {
+      position: relative;
+      z-index: 1;
+    }
+    .ethereum-wallet-tx-highlight::before {
+      content: "";
+      position: absolute;
+      top: -4px;
+      left: -6px;
+      right: -6px;
+      bottom: -4px;
+      z-index: -1;
+      background-color: #DDF3E4;
+      border-radius: 8px;
+    }
   `;
 
   // Create a style element and append the CSS styles
@@ -475,11 +491,13 @@ export function createModal({
                       </div>
                       <div class="ethereum-wallet-tx-info-row">
                         <dt>Type</dt>
-                        <dd>${tx.actions[0].params.methodName}</dd>
+                        <dd class="ethereum-wallet-tx-highlight">${
+                          tx.actions[0].params.methodName
+                        }</dd>
                       </div>
                       <div class="ethereum-wallet-tx-info-row">
                         <dt>Deposit</dt>
-                        <dd>${formatUnits(
+                        <dd class="ethereum-wallet-tx-highlight">${formatUnits(
                           BigInt(tx.actions[0].params.deposit),
                           24
                         )} NEAR</dd>
@@ -498,8 +516,14 @@ export function createModal({
                           <dd>${tx.receiverId}</dd>
                         </div>
                         <div class="ethereum-wallet-tx-info-row">
+                          <dt>Type</dt>
+                          <dd class="ethereum-wallet-tx-highlight">${
+                            tx.actions[0].type
+                          }</dd>
+                        </div>
+                        <div class="ethereum-wallet-tx-info-row">
                           <dt>Amount</dt>
-                          <dd>${formatUnits(
+                          <dd class="ethereum-wallet-tx-highlight">${formatUnits(
                             BigInt(tx.actions[0].params.deposit),
                             24
                           )} NEAR</dd>
