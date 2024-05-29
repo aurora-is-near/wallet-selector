@@ -230,6 +230,7 @@ export function createModal({
       padding: 10px;
       background: #F1F1F1;
       border-radius: 8px;
+      width: 100%;
       max-width: 100%;
       overflow: auto;
     }
@@ -241,6 +242,8 @@ export function createModal({
       color: #646464;
       word-wrap: break-word;
       overflow-wrap: break-word;
+      white-space: pre-wrap;
+      margin: 0;
     }
 
     .ethereum-wallet-txs-status {
