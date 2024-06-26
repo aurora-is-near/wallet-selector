@@ -48,7 +48,7 @@ import {
 
 export interface EthereumWalletsParams {
   wagmiConfig: Config;
-  web3Modal: {
+  web3Modal?: {
     open: () => void;
     subscribeEvents: (
       f: (event: { data: { event: string } }) => void
@@ -429,12 +429,15 @@ const EthereumWallets: WalletBehaviourFactory<
         key
       );
       return { relayerPublicKey, onboardingTransaction: null };
-    } catch (error) {
-      logger.warn(
-        "Need to add the relayer access key.",
-        relayerPublicKey,
-        error
-      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      logger.error(error);
+      if (!error.message?.includes("does not exist while viewing")) {
+        throw new Error(
+          "Failed to view the relayer public key (view_access_key)."
+        );
+      }
+      logger.warn("Need to add the relayer access key:", relayerPublicKey);
       // Add the relayer's access key on-chain.
       return {
         relayerPublicKey,
@@ -518,12 +521,9 @@ const EthereumWallets: WalletBehaviourFactory<
       // Onboard the relayer before executing other transactions.
       txs = [onboardingTransaction, ...txs];
     }
-    const { selectedNetworkId } = web3Modal.getState();
-    if (selectedNetworkId !== expectedChainId) {
-      await wagmiCore!.switchChain(wagmiConfig, {
-        chainId: expectedChainId,
-      });
-    }
+    await wagmiCore!.switchChain(wagmiConfig, {
+      chainId: expectedChainId,
+    });
     const results: Array<FinalExecutionOutcome> = [];
     await (() => {
       return new Promise<void>((resolve, reject) => {
@@ -553,6 +553,7 @@ const EthereumWallets: WalletBehaviourFactory<
               });
               let receipt;
               try {
+                // NOTE: error is thrown if tx failed so we catch it to get the receipt.
                 receipt = await wagmiCore!.waitForTransactionReceipt(
                   wagmiConfig,
                   {
@@ -562,21 +563,39 @@ const EthereumWallets: WalletBehaviourFactory<
                 );
               } catch (error) {
                 logger.error(error);
-                receipt = await wagmiCore!.getTransactionReceipt(wagmiConfig, {
-                  hash: txHash,
-                  chainId: expectedChainId,
-                });
+                while (!receipt) {
+                  try {
+                    await new Promise((r) => setTimeout(r, 1000));
+                    receipt = await wagmiCore!.getTransactionReceipt(
+                      wagmiConfig,
+                      {
+                        hash: txHash,
+                        chainId: expectedChainId,
+                      }
+                    );
+                  } catch (err) {
+                    logger.log(err);
+                  }
+                }
               }
               logger.log("Receipt:", receipt);
               const nearProvider = new JsonRpcProvider(
                 // @ts-expect-error
                 provider.provider.connection
               );
-              const nearTx = await nearProvider.txStatus(
-                // @ts-expect-error
-                receipt.nearTransactionHash,
-                accountLogIn.accountId
-              );
+              let nearTx;
+              while (!nearTx) {
+                try {
+                  await new Promise((r) => setTimeout(r, 1000));
+                  nearTx = await nearProvider.txStatus(
+                    // @ts-expect-error
+                    receipt.nearTransactionHash,
+                    accountLogIn.accountId
+                  );
+                } catch (err) {
+                  logger.log(err);
+                }
+              }
               logger.log("NEAR transaction:", nearTx);
               if (receipt.status !== "success") {
                 const failedOutcome = nearTx.receipts_outcome.find(
@@ -672,43 +691,50 @@ const EthereumWallets: WalletBehaviourFactory<
         // Open web3Modal and wait for a wallet to be connected or for the web3Modal to be closed.
         if (!address) {
           try {
-            web3Modal.open();
-            const newData: GetAccountReturnType = await (() => {
-              return new Promise((resolve, reject) => {
-                try {
-                  unwatchAccountConnected = wagmiCore!.watchAccount(
-                    wagmiConfig,
-                    {
-                      onChange: (data: GetAccountReturnType) => {
-                        if (!data.address) {
-                          return;
-                        }
-                        resolve(data);
-                      },
-                    }
-                  );
-                  unsubscribeCloseModal = web3Modal.subscribeEvents(
-                    (event: { data: { event: string } }) => {
-                      const newAccount = wagmiCore!.getAccount(wagmiConfig);
-                      if (
-                        event.data.event === "MODAL_CLOSE" &&
-                        !newAccount.address
-                      ) {
-                        logger.error(
-                          "Web3Modal closed without connecting to an Ethereum wallet."
-                        );
-                        reject(
-                          "Web3Modal closed without connecting to an Ethereum wallet."
-                        );
+            if (web3Modal) {
+              web3Modal.open();
+              const newData: GetAccountReturnType = await (() => {
+                return new Promise((resolve, reject) => {
+                  try {
+                    unwatchAccountConnected = wagmiCore!.watchAccount(
+                      wagmiConfig,
+                      {
+                        onChange: (data: GetAccountReturnType) => {
+                          if (!data.address) {
+                            return;
+                          }
+                          resolve(data);
+                        },
                       }
-                    }
-                  );
-                } catch (error) {
-                  reject("User rejected");
-                }
+                    );
+                    unsubscribeCloseModal = web3Modal.subscribeEvents(
+                      (event: { data: { event: string } }) => {
+                        const newAccount = wagmiCore!.getAccount(wagmiConfig);
+                        if (
+                          event.data.event === "MODAL_CLOSE" &&
+                          !newAccount.address
+                        ) {
+                          logger.error(
+                            "Web3Modal closed without connecting to an Ethereum wallet."
+                          );
+                          reject(
+                            "Web3Modal closed without connecting to an Ethereum wallet."
+                          );
+                        }
+                      }
+                    );
+                  } catch (error) {
+                    reject("User rejected");
+                  }
+                });
+              })();
+              address = newData.address?.toLowerCase();
+            } else {
+              const { accounts } = await wagmiCore!.connect(wagmiConfig, {
+                connector: wagmiCore!.injected(),
               });
-            })();
-            address = newData.address?.toLowerCase();
+              address = accounts[0]?.toLowerCase();
+            }
             if (!address) {
               throw new Error("Failed to get Ethereum wallet address");
             }
@@ -732,19 +758,16 @@ const EthereumWallets: WalletBehaviourFactory<
           logger.log("Wallet already connected");
         }
 
-        const { selectedNetworkId } = web3Modal.getState();
-        if (selectedNetworkId !== expectedChainId) {
-          try {
-            await wagmiCore!.switchChain(wagmiConfig, {
-              chainId: expectedChainId,
-            });
-          } catch (error) {
-            logger.error(error);
-            // TODO: add the link to onboarding page when available.
-            throw new Error(
-              "Wallet didn't connect to NEAR Protocol network, try adding and selecting the network manually inside wallet settings."
-            );
-          }
+        try {
+          await wagmiCore!.switchChain(wagmiConfig, {
+            chainId: expectedChainId,
+          });
+        } catch (error) {
+          logger.error(error);
+          // TODO: add the link to onboarding page when available.
+          throw new Error(
+            "Wallet didn't connect to NEAR Protocol network, try adding and selecting the network manually inside wallet settings."
+          );
         }
 
         // Login with FunctionCall access key, reuse keypair or create a new one.
@@ -884,8 +907,8 @@ export function setupEthereumWallets(
       id: "ethereum-wallets",
       type: "injected",
       metadata: {
-        name: "Ethereum Wallets",
-        description: "Ethereum wallets for NEAR.",
+        name: "Ethereum Wallet",
+        description: "Ethereum wallets (EOA) on NEAR Protocol.",
         iconUrl: params.iconUrl ?? icon,
         deprecated: params.deprecated ?? false,
         available: true,
