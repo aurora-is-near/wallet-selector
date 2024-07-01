@@ -224,6 +224,14 @@ export function createModal({
       outline-color: #8B8D98;
       border: 1px solid rgba(1, 6, 47, 0.173);
     }
+    .ethereum-wallet-btn-confirm {
+      padding: 14px;
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 700;
+      width: 100%;
+      margin-top: 24px;
+    }
     .ethereum-wallet-btn-cancel {
       padding: 14px;
       font-size: 14px;
@@ -239,6 +247,17 @@ export function createModal({
       line-height: 16px;
       letter-spacing: 0.04px;
       border-radius: 9999px;
+    }
+
+    .ethereum-wallet-tx-error {
+      font-size: 14px;
+      line-height: 20px;
+      color: #dc2626;
+      font-weight: 700;
+      text-align: center;
+      text-wrap: balance;
+      margin-top: 20px;
+      margin-bottom: 0px;
     }
 
     .ethereum-wallet-txs-details {
@@ -273,6 +292,7 @@ export function createModal({
       border-radius: 8px;
       width: 100%;
       margin-top: 24px;
+      border: 1px solid rgba(0,0,0,0);
     }
     .ethereum-wallet-txs-status p {
       margin: 0;
@@ -603,21 +623,23 @@ export function createModal({
               <div class="ethereum-wallet-txs-details">
                 <p>${JSON.stringify(tx.actions[0], null, 2)}</p>
               </div>
-              <p>${error ?? ""}</p>
-              <button class="ethereum-wallet-btn ethereum-wallet-txs-status" id="confirm-btn-${i}">
-                <p>
-                ${
-                  onConfirm
-                    ? "Confirm"
-                    : isSent
-                    ? "Sending transaction"
-                    : "Sign the transaction in your wallet"
-                }
-                </p>
-                ${
-                  onConfirm ? "" : `<div class="ethereum-wallet-spinner"></div>`
-                }
-              </button>
+              ${error ? `<p class="ethereum-wallet-tx-error">${error}</p>` : ""}
+              ${
+                onConfirm
+                  ? `<button class="ethereum-wallet-btn ethereum-wallet-btn-confirm" id="confirm-btn-${i}">
+                      <span>Confirm transaction</span>
+                    </button>`
+                  : `<div class="ethereum-wallet-txs-status">
+                      <p>
+                      ${
+                        isSent
+                          ? "Sending transaction"
+                          : "Sign the transaction in your wallet"
+                      }
+                      </p>
+                      <div class="ethereum-wallet-spinner"></div>
+                    </div>`
+              }
             `
         }
       `;
