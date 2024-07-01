@@ -627,7 +627,7 @@ export function createModal({
               ${
                 onConfirm
                   ? `<button class="ethereum-wallet-btn ethereum-wallet-btn-confirm" id="confirm-btn-${i}">
-                      <span>Confirm transaction</span>
+                      Confirm transaction
                     </button>`
                   : `<div class="ethereum-wallet-txs-status">
                       <p>
