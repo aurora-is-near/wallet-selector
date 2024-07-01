@@ -44,12 +44,14 @@ import {
   DEFAULT_ACCESS_KEY_ALLOWANCE,
   RLP_EXECUTE,
   MAX_TGAS,
+  EthTxError,
 } from "./utils";
 
 export interface EthereumWalletsParams {
   wagmiConfig: Config;
   web3Modal?: {
     open: () => void;
+    close: () => void;
     subscribeEvents: (
       f: (event: { data: { event: string } }) => void
     ) => () => void;
@@ -276,11 +278,8 @@ const EthereumWallets: WalletBehaviourFactory<
         throw new Error("Invalid action type");
       }
     }
-    const gas = await wagmiCore!.estimateGas(wagmiConfig, ethTx);
-    const result = await wagmiCore!.writeContract(wagmiConfig, {
-      ...ethTx,
-      gas,
-    });
+    const { request } = await wagmiCore!.simulateContract(wagmiConfig, ethTx);
+    const result = await wagmiCore!.writeContract(wagmiConfig, request);
     return result;
   };
 
@@ -302,6 +301,11 @@ const EthereumWallets: WalletBehaviourFactory<
               devMode ? address + "." + devModeAccount : address
             );
             if (!keyPair) {
+              try {
+                wagmiCore!.disconnect(wagmiConfig);
+              } catch (error) {
+                logger.error(error);
+              }
               emitter.emit("signedOut", null);
               return;
             }
@@ -474,7 +478,7 @@ const EthereumWallets: WalletBehaviourFactory<
     const nearTxs = await transformTransactions(transactions);
     const [accountLogIn] = await getAccounts();
     // If transactions can be executed with FunctionCall access key do it, otherwise execute 1 by 1 with Ethereum wallet.
-    if (accountLogIn.publicKey) {
+    if (accountLogIn.publicKey && nearTxs.length) {
       let accessKeyUsable;
       try {
         const accessKey = await provider.query<AccessKeyViewRaw>({
@@ -543,17 +547,60 @@ const EthereumWallets: WalletBehaviourFactory<
           try {
             const ethTxHashes: Array<string> = [];
             for (const [index, tx] of txs.entries()) {
-              renderTxs({
-                selectedIndex: index,
-                ethTxHashes,
-              });
-              const txHash = await executeTransaction({ tx, relayerPublicKey });
+              let txHash;
+              let txError: string | null = null;
+              while (!txHash) {
+                try {
+                  await (() => {
+                    return new Promise<void>((resolveTx, rejectTx) => {
+                      renderTxs({
+                        selectedIndex: index,
+                        ethTxHashes,
+                        error: txError,
+                        onConfirm: async () => {
+                          try {
+                            txError = null;
+                            renderTxs({
+                              selectedIndex: index,
+                              ethTxHashes,
+                              error: txError,
+                            });
+                            txHash = await executeTransaction({
+                              tx,
+                              relayerPublicKey,
+                            });
+                            resolveTx();
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          } catch (err: any) {
+                            logger.error(err);
+                            if (
+                              !err.message?.includes("reject") &&
+                              !err.message?.includes("denied")
+                            ) {
+                              txError = "Transaction execution error.";
+                            }
+                            rejectTx(
+                              new EthTxError("Transaction request error.")
+                            );
+                          }
+                        },
+                      });
+                    });
+                  })();
+                } catch (error) {
+                  logger.error(error);
+                  if (!(error instanceof EthTxError)) {
+                    throw new Error("Ethereum modal render error.");
+                  }
+                }
+              }
               logger.log(`Sent transaction: ${txHash}`);
               ethTxHashes.push(txHash);
               renderTxs({
                 selectedIndex: index,
                 ethTxHashes,
               });
+              await new Promise((r) => setTimeout(r, 2000));
               let receipt;
               try {
                 // NOTE: error is thrown if tx failed so we catch it to get the receipt.
@@ -849,6 +896,14 @@ const EthereumWallets: WalletBehaviourFactory<
           setupEvents();
         }
         _state.isConnecting = false;
+        try {
+          // Hide modal which stays open after adding a new network.
+          if (web3Modal) {
+            web3Modal.close();
+          }
+        } catch (error) {
+          logger.error(error);
+        }
         return [accountLogIn];
       } catch (error) {
         _state.isConnecting = false;
