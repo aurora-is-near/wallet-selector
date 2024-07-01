@@ -213,6 +213,10 @@ export function createModal({
       color: #1C2024;
       border: 1px solid rgba(1, 6, 47, 0.173) !important;
       background-color: #fff !important;
+      padding: 14px;
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 700;
     }
     .ethereum-wallet-btn:hover {
       border: 1px solid rgba(1, 6, 47, 0.173);
@@ -224,28 +228,34 @@ export function createModal({
       outline-color: #8B8D98;
       border: 1px solid rgba(1, 6, 47, 0.173);
     }
-    .ethereum-wallet-btn-confirm {
-      padding: 14px;
-      font-size: 14px;
-      line-height: 20px;
-      font-weight: 700;
-      width: 100%;
-      margin-top: 24px;
+    .ethereum-wallet-btn-sm {
+      padding: 10px 14px;
+      font-size: 12px;
+      line-height: 16px;
     }
-    .ethereum-wallet-btn-cancel {
-      padding: 14px;
-      font-size: 14px;
-      line-height: 20px;
-      font-weight: 700;
-      width: 100%;
-    }
-    .ethereum-wallet-btn-details {
-      margin-top: 20px;
+    .ethereum-wallet-btn-xs {
       padding: 8px 12px;
       font-weight: 500;
       font-size: 12px;
       line-height: 16px;
       letter-spacing: 0.04px;
+      border-radius: 9999px;
+    }
+    .ethereum-wallet-btn-confirm {
+      width: 100%;
+      margin-top: 24px;
+    }
+    .ethereum-wallet-btn-cancel {
+      width: 100%;
+      background-color: #FFF9F9 !important;
+      color: #dc2626 !important;
+      border: 1px solid #fecaca !important;
+    }
+    .ethereum-wallet-btn-cancel:hover {
+      background-color: #fef2f2 !important;
+    }
+    .ethereum-wallet-btn-details {
+      margin-top: 20px;
       border-radius: 9999px;
     }
 
@@ -384,7 +394,7 @@ export function createModal({
           }</h2>`
     }
     <div class="ethereum-wallet-txs"></div>
-    <button class="ethereum-wallet-btn ethereum-wallet-btn-cancel">Cancel</button>
+    <button class="ethereum-wallet-btn ethereum-wallet-btn-sm ethereum-wallet-btn-cancel">Cancel</button>
   `;
 
   // // Append the elements to form the complete structure
@@ -619,7 +629,7 @@ export function createModal({
                     `
                 }
               </div>
-              <button class="ethereum-wallet-btn ethereum-wallet-btn-details">Show details</button>
+              <button class="ethereum-wallet-btn ethereum-wallet-btn-xs ethereum-wallet-btn-details">Show details</button>
               <div class="ethereum-wallet-txs-details">
                 <p>${JSON.stringify(tx.actions[0], null, 2)}</p>
               </div>
