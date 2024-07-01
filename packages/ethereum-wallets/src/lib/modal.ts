@@ -344,18 +344,21 @@ export function createModal({
   modalContentContainer.classList.add("ethereum-wallet-modal-container");
 
   // Modal content
+  const isLogIn = txs.find((tx) => tx.actions[0].type === "AddKey");
   const modalContent = window.document.createElement("div");
   modalContent.classList.add("ethereum-wallet-modal-content");
   modalContent.innerHTML = `
     ${
-      txs.length === 1 &&
-      txs[0].actions.length === 1 &&
-      txs[0].actions[0].type === "AddKey"
+      txs.length === 1 && isLogIn
         ? "<h2>Log in</h2>"
         : txs.length === 1 &&
           txs[0].actions.length === 1 &&
           txs[0].actions[0].type === "DeleteKey"
         ? "<h2>Log out</h2>"
+        : isLogIn
+        ? `<h2>Log in: execute ${txs.length} transaction${
+            txs.length > 1 ? "s" : ""
+          }</h2>`
         : `<h2>Execute ${txs.length} transaction${
             txs.length > 1 ? "s" : ""
           }</h2>`
@@ -395,9 +398,13 @@ export function createModal({
   const renderTxs = ({
     selectedIndex,
     ethTxHashes,
+    error,
+    onConfirm,
   }: {
     selectedIndex: number;
     ethTxHashes: Array<string>;
+    error?: string | null;
+    onConfirm?: () => void;
   }) => {
     const container = document.querySelector(
       ".ethereum-wallet-txs"
@@ -596,23 +603,33 @@ export function createModal({
               <div class="ethereum-wallet-txs-details">
                 <p>${JSON.stringify(tx.actions[0], null, 2)}</p>
               </div>
-              <div class="ethereum-wallet-txs-status">
+              <p>${error ?? ""}</p>
+              <button class="ethereum-wallet-btn ethereum-wallet-txs-status" id="confirm-btn-${i}">
                 <p>
                 ${
-                  isSent
+                  onConfirm
+                    ? "Confirm"
+                    : isSent
                     ? "Sending transaction"
                     : "Sign the transaction in your wallet"
                 }
                 </p>
-                <div class="ethereum-wallet-spinner"></div>
-              </div>
+                ${
+                  onConfirm ? "" : `<div class="ethereum-wallet-spinner"></div>`
+                }
+              </button>
             `
         }
-
       `;
-
       container.appendChild(txElement);
     });
+    if (onConfirm) {
+      window.document
+        .querySelector(`#confirm-btn-${selectedIndex}`)
+        ?.addEventListener("click", () => {
+          onConfirm();
+        });
+    }
 
     const toggleButton = window.document.querySelector(
       ".ethereum-wallet-btn-details"
