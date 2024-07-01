@@ -375,12 +375,17 @@ export function createModal({
 
   // Modal content
   const isLogIn = txs.find((tx) => tx.actions[0].type === "AddKey");
+  const isOnboard = txs.find(
+    (tx) =>
+      tx.actions[0].type === "AddKey" &&
+      tx.actions[0].params.publicKey === relayerPublicKey
+  );
   const modalContent = window.document.createElement("div");
   modalContent.classList.add("ethereum-wallet-modal-content");
   modalContent.innerHTML = `
     ${
       txs.length === 1 && isLogIn
-        ? "<h2>Log in</h2>"
+        ? `<h2>${isOnboard ? "Onboard" : "Log in"}</h2>`
         : txs.length === 1 &&
           txs[0].actions.length === 1 &&
           txs[0].actions[0].type === "DeleteKey"
@@ -389,9 +394,7 @@ export function createModal({
         ? `<h2>Log in: execute ${txs.length} transaction${
             txs.length > 1 ? "s" : ""
           }</h2>`
-        : `<h2>Execute ${txs.length} transaction${
-            txs.length > 1 ? "s" : ""
-          }</h2>`
+        : `<h2>Send ${txs.length} transaction${txs.length > 1 ? "s" : ""}</h2>`
     }
     <div class="ethereum-wallet-txs"></div>
     <button class="ethereum-wallet-btn ethereum-wallet-btn-sm ethereum-wallet-btn-cancel">Cancel</button>
@@ -644,7 +647,7 @@ export function createModal({
                       ${
                         isSent
                           ? "Sending transaction"
-                          : "Sign the transaction in your wallet"
+                          : "Confirm in your wallet"
                       }
                       </p>
                       <div class="ethereum-wallet-spinner"></div>
