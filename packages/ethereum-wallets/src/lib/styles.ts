@@ -158,6 +158,9 @@ export const modalStyles = `
     justify-content: space-between;
     column-gap: 20px;
   }
+  .ethereum-wallet-tx-info-row dt {
+    flex-shrink: 0;
+  }
   .ethereum-wallet-tx-info-text {
     padding: 10px;
   }

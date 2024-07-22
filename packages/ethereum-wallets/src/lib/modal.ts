@@ -389,13 +389,34 @@ export function createChainSwitchModal({ chain }: { chain: Chain }) {
   modalContent.classList.add("ethereum-wallet-modal-content");
   modalContent.innerHTML = `
     <h2>Switch Network</h2>
-    <div>Please approve the switch network request in your wallet.</div>
-    <div>If you experience problems connecting you may need to add the network manually from your wallet settings and try again.</div>
-    <div>Network Name: ${chain.name}</div>
-    <div>RPC url: ${chain.rpcUrls.default.http[0]}</div>
-    <div>Chain ID: ${chain.id}</div>
-    <div>Symbol: ${chain.nativeCurrency.symbol}</div>
-    <div>Block Explorer URL: ${chain.blockExplorers?.default.url}</div>
+    <div class="ethereum-wallet-tx-params">
+      <div class="ethereum-wallet-tx-info-text">
+        <p>Please approve the switch network request in your wallet.</p>
+        <p>If you experience problems connecting you may need to add the network manually from your wallet settings and try again.</p>
+      </div>
+      <dl>
+        <div class="ethereum-wallet-tx-info-row">
+          <dt>Network Name</dt>
+          <dd>${chain.name}</dd>
+        </div>
+        <div class="ethereum-wallet-tx-info-row">
+          <dt>RPC URL</dt>
+          <dd>${chain.rpcUrls.default.http[0]}</dd>
+        </div>
+        <div class="ethereum-wallet-tx-info-row">
+          <dt>Chain ID</dt>
+          <dd>${chain.id}</dd>
+        </div>
+        <div class="ethereum-wallet-tx-info-row">
+          <dt>Symbol</dt>
+          <dd>${chain.nativeCurrency.symbol}</dd>
+        </div>
+        <div class="ethereum-wallet-tx-info-row">
+          <dt>Block Explorer URL</dt>
+          <dd>${chain.blockExplorers?.default.url}</dd>
+        </div>
+      </dl>
+    </div>
     <button class="ethereum-wallet-btn ethereum-wallet-btn-sm ethereum-wallet-btn-cancel">Close</button>
   `;
 
