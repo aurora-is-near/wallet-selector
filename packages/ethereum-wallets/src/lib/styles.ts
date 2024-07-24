@@ -15,6 +15,25 @@ export const modalStyles = `
     top: auto;
   }
 
+  .ethereum-wallet-modal dt {
+    flex-shrink: 0;
+    margin: 0;
+    font-size: 14px;
+    line-height: 20px;
+    color: #202020;
+    font-weight: 500;
+  }
+  .ethereum-wallet-modal dd {
+    margin: 0;
+    font-size: 14px;
+    line-height: 20px;
+    color: #202020;
+    font-weight: 700;
+    text-align: right;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+
   .ethereum-wallet-modal {
     display: none;
     position: relative;
@@ -158,8 +177,13 @@ export const modalStyles = `
     justify-content: space-between;
     column-gap: 20px;
   }
-  .ethereum-wallet-tx-info-row dt {
-    flex-shrink: 0;
+  .ethereum-wallet-tx-info-col {
+    padding: 14px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    row-gap: 4px;
+    align-items: start;
   }
   .ethereum-wallet-tx-info-text {
     padding: 10px;
@@ -174,23 +198,6 @@ export const modalStyles = `
   }
   .ethereum-wallet-tx-params div:not(:last-child) {
     border-bottom: 1px solid #EBEBEB;
-  }
-  .ethereum-wallet-tx-params dt {
-    margin: 0;
-    font-size: 14px;
-    line-height: 20px;
-    color: #202020;
-    font-weight: 500;
-  }
-  .ethereum-wallet-tx-params dd {
-    margin: 0;
-    font-size: 14px;
-    line-height: 20px;
-    color: #202020;
-    font-weight: 700;
-    text-align: right;
-    word-break: break-all;
-    overflow-wrap: break-word;
   }
 
   .ethereum-wallet-btn {

@@ -395,23 +395,23 @@ export function createChainSwitchModal({ chain }: { chain: Chain }) {
         <p>If you experience problems connecting you may need to add the network manually from your wallet settings and try again.</p>
       </div>
       <dl>
-        <div class="ethereum-wallet-tx-info-row">
+        <div class="ethereum-wallet-tx-info-col">
           <dt>Network Name</dt>
           <dd>${chain.name}</dd>
         </div>
-        <div class="ethereum-wallet-tx-info-row">
+        <div class="ethereum-wallet-tx-info-col">
           <dt>RPC URL</dt>
           <dd>${chain.rpcUrls.default.http[0]}</dd>
         </div>
-        <div class="ethereum-wallet-tx-info-row">
+        <div class="ethereum-wallet-tx-info-col">
           <dt>Chain ID</dt>
           <dd>${chain.id}</dd>
         </div>
-        <div class="ethereum-wallet-tx-info-row">
+        <div class="ethereum-wallet-tx-info-col">
           <dt>Symbol</dt>
           <dd>${chain.nativeCurrency.symbol}</dd>
         </div>
-        <div class="ethereum-wallet-tx-info-row">
+        <div class="ethereum-wallet-tx-info-col">
           <dt>Block Explorer URL</dt>
           <dd>${chain.blockExplorers?.default.url}</dd>
         </div>
