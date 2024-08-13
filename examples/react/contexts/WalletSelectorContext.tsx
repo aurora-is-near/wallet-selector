@@ -48,7 +48,7 @@ import {
   watchAccount,
 } from "@wagmi/core";
 import { type Chain } from "@wagmi/core/chains";
-import { injected, walletConnect } from "@wagmi/connectors";
+import { injected } from "@wagmi/connectors";
 
 import { Loading } from "../components/Loading";
 import { CONTRACT_ID } from "../constants";
@@ -77,7 +77,7 @@ const projectId = "30147604c5f01d0bc4482ab0665b5697";
 // TODO: Replace with the NEAR chain after the protocol upgrade.
 const near: Chain = {
   id: 398,
-  name: "NEAR wallet playground",
+  name: "NEAR Protocol Testnet",
   nativeCurrency: {
     decimals: 18,
     name: "NEAR",
@@ -101,19 +101,7 @@ const wagmiConfig: Config = createConfig({
   transports: {
     [near.id]: http(),
   },
-  connectors: [
-    walletConnect({
-      projectId,
-      metadata: {
-        name: "NEAR Guest Book",
-        description: "A guest book with comments stored on the NEAR blockchain",
-        url: "https://near.github.io/wallet-selector",
-        icons: ["https://near.github.io/wallet-selector/favicon.ico"],
-      },
-      showQrModal: false,
-    }),
-    injected({ shimDisconnect: true }),
-  ],
+  connectors: [injected({ shimDisconnect: true })],
 });
 reconnect(wagmiConfig);
 
@@ -188,7 +176,7 @@ export const WalletSelectorContextProvider: React.FC<{
         setupNearMobileWallet(),
         setupMintbaseWallet({ contractId: CONTRACT_ID }),
         setupBitteWallet({ contractId: CONTRACT_ID }),
-        setupEthereumWallets({ wagmiConfig, web3Modal, devMode: true }),
+        setupEthereumWallets({ wagmiConfig, web3Modal }),
       ],
     });
     const _modal = setupModal(_selector, {
