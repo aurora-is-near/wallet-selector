@@ -64,6 +64,7 @@ export interface EthereumWalletsParams {
   devMode?: boolean;
   devModeAccount?: string;
   deprecated?: boolean;
+  nearNodeUrl?: string;
 }
 
 interface EthereumWalletsState {
@@ -103,6 +104,7 @@ const EthereumWallets: WalletBehaviourFactory<
     alwaysOnboardDuringSignIn = false,
     devMode,
     devModeAccount = "eth-wallet.testnet",
+    nearNodeUrl,
   },
 }) => {
   if (!wagmiCore) {
@@ -123,6 +125,17 @@ const EthereumWallets: WalletBehaviourFactory<
   if (!nearExplorer) {
     throw new Error("Failed to parse NEAR explorer url from wagmiConfig.");
   }
+  // NOTE: use a custom provider because the failover provider doesn't give error details.
+  const nearProvider = new JsonRpcProvider(
+    nearNodeUrl ??
+      // @ts-expect-error
+      provider.provider.connection ??
+      // @ts-expect-error
+      provider.provider.providers[
+        // @ts-expect-error
+        provider.provider.currentProviderIndex
+      ].connection
+  );
 
   const getAccounts = async (): Promise<Array<Account>> => {
     const address = wagmiCore!.getAccount(wagmiConfig).address?.toLowerCase();
@@ -422,7 +435,7 @@ const EthereumWallets: WalletBehaviourFactory<
       throw new Error("Failed to fetch the relayer's public key.");
     }
     try {
-      const key = await provider.query<AccessKeyViewRaw>({
+      const key = await nearProvider.query<AccessKeyViewRaw>({
         request_type: "view_access_key",
         finality: "final",
         account_id: accountId,
@@ -439,6 +452,8 @@ const EthereumWallets: WalletBehaviourFactory<
       logger.error(error);
       if (
         !error.message?.includes("does not exist while viewing") &&
+        !error.message?.includes("doesn't exist") &&
+        !error.message?.includes("does not exist") &&
         !error.message?.includes("has never been observed on the node")
       ) {
         throw new Error(
@@ -505,7 +520,7 @@ const EthereumWallets: WalletBehaviourFactory<
     if (accountLogIn.publicKey && nearTxs.length) {
       let accessKeyUsable;
       try {
-        const accessKey = await provider.query<AccessKeyViewRaw>({
+        const accessKey = await nearProvider.query<AccessKeyViewRaw>({
           request_type: "view_access_key",
           finality: "final",
           account_id: accountLogIn.accountId,
@@ -651,10 +666,6 @@ const EthereumWallets: WalletBehaviourFactory<
                 }
               }
               logger.log("Receipt:", receipt);
-              const nearProvider = new JsonRpcProvider(
-                // @ts-expect-error
-                provider.provider.connection
-              );
               let nearTx;
               while (!nearTx) {
                 try {
@@ -688,6 +699,8 @@ const EthereumWallets: WalletBehaviourFactory<
                     "Transaction execution error, failed to parse failure reason."
                   );
                 }
+                // NOTE: after return, `finally { hideModal() }` will run.
+                return;
               }
               results.push(nearTx);
             }
@@ -709,7 +722,7 @@ const EthereumWallets: WalletBehaviourFactory<
     if (accountLogIn.publicKey) {
       try {
         // Check that the key exists before making a transaction.
-        await provider.query<AccessKeyViewRaw>({
+        await nearProvider.query<AccessKeyViewRaw>({
           request_type: "view_access_key",
           finality: "final",
           account_id: accountLogIn.accountId,
@@ -840,7 +853,7 @@ const EthereumWallets: WalletBehaviourFactory<
           let reUseKeyPair = false;
           if (keyPair) {
             try {
-              await provider.query<AccessKeyViewRaw>({
+              await nearProvider.query<AccessKeyViewRaw>({
                 request_type: "view_access_key",
                 finality: "final",
                 account_id: accountId,
@@ -934,14 +947,14 @@ const EthereumWallets: WalletBehaviourFactory<
     async verifyOwner({ message }) {
       logger.log("EthereumWallets:verifyOwner", { message });
       throw new Error(
-        "Not implemented: ed25519 N/A, use eth_sign or eth_signTypedData_v4 instead."
+        "Not implemented: ed25519 N/A, '\x19Ethereum Signed Message:\n' prefix is not compatible, use personal_sign or eth_signTypedData_v4 instead."
       );
     },
 
     async signMessage({ message, nonce, recipient }) {
       logger.log("EthereumWallets:signMessage", { message, nonce, recipient });
       throw new Error(
-        "Not implemented: ed25519 N/A, use eth_sign or eth_signTypedData_v4 instead."
+        "Not implemented: ed25519 N/A, '\x19Ethereum Signed Message:\n' prefix is not compatible, use personal_sign or eth_signTypedData_v4 instead."
       );
     },
 
