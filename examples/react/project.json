@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "examples/react",
   "projectType": "application",
+  "implicitDependencies": ["modal-ui"],
   "targets": {
     "build": {
       "executor": "@nx/next:build",
