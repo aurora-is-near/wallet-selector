@@ -65,6 +65,7 @@ export interface EthereumWalletsParams {
   devModeAccount?: string;
   deprecated?: boolean;
   nearNodeUrl?: string;
+  skipSignInAccessKey?: boolean;
 }
 
 interface EthereumWalletsState {
@@ -105,6 +106,7 @@ const EthereumWallets: WalletBehaviourFactory<
     devMode,
     devModeAccount = "eth-wallet.testnet",
     nearNodeUrl,
+    skipSignInAccessKey,
   },
 }) => {
   if (!wagmiCore) {
@@ -292,8 +294,9 @@ const EthereumWallets: WalletBehaviourFactory<
         throw new Error("Invalid action type");
       }
     }
-    const { request } = await wagmiCore!.simulateContract(wagmiConfig, ethTx);
-    const result = await wagmiCore!.writeContract(wagmiConfig, request);
+    // NOTE: re-add simulateContract and parse errors after eth_call implements errors.
+    // const { request } = await wagmiCore!.simulateContract(wagmiConfig, ethTx);
+    const result = await wagmiCore!.writeContract(wagmiConfig, ethTx);
     return result;
   };
 
@@ -314,7 +317,7 @@ const EthereumWallets: WalletBehaviourFactory<
               options.network.networkId,
               devMode ? address + "." + devModeAccount : address
             );
-            if (!keyPair) {
+            if (!keyPair && !skipSignInAccessKey) {
               try {
                 wagmiCore!.disconnect(wagmiConfig);
               } catch (error) {
@@ -543,7 +546,9 @@ const EthereumWallets: WalletBehaviourFactory<
         );
         const results: Array<FinalExecutionOutcome> = [];
         for (let i = 0; i < signedTransactions.length; i += 1) {
-          const nearTx = await provider.sendTransaction(signedTransactions[i]);
+          const nearTx = await nearProvider.sendTransaction(
+            signedTransactions[i]
+          );
           logger.log("NEAR transaction:", nearTx);
           if (
             typeof nearTx.status === "object" &&
@@ -586,6 +591,7 @@ const EthereumWallets: WalletBehaviourFactory<
             for (const [index, tx] of txs.entries()) {
               let txHash;
               let txError: string | null = null;
+              let showDetails = false;
               while (!txHash) {
                 try {
                   await (() => {
@@ -594,6 +600,10 @@ const EthereumWallets: WalletBehaviourFactory<
                         selectedIndex: index,
                         ethTxHashes,
                         error: txError,
+                        showDetails,
+                        onShowDetails: (state: boolean) => {
+                          showDetails = state;
+                        },
                         onConfirm: async () => {
                           try {
                             txError = null;
@@ -601,6 +611,7 @@ const EthereumWallets: WalletBehaviourFactory<
                               selectedIndex: index,
                               ethTxHashes,
                               error: txError,
+                              showDetails,
                             });
                             txHash = await executeTransaction({
                               tx,
@@ -845,7 +856,7 @@ const EthereumWallets: WalletBehaviourFactory<
         // Login with FunctionCall access key, reuse keypair or create a new one.
         const accountId = devMode ? address + "." + devModeAccount : address;
         let publicKey;
-        if (contractId) {
+        if (contractId && !skipSignInAccessKey) {
           const keyPair = await _state.keystore.getKey(
             options.network.networkId,
             accountId
@@ -992,7 +1003,7 @@ export function setupEthereumWallets(
         iconUrl: params.iconUrl ?? icon,
         deprecated: params.deprecated ?? false,
         available: true,
-        downloadUrl: "",
+        downloadUrl: "https://explorer.walletconnect.com",
       },
       init: (config) => {
         return EthereumWallets({
