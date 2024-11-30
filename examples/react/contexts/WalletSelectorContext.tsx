@@ -48,7 +48,7 @@ import {
   watchAccount,
 } from "@wagmi/core";
 import { type Chain } from "@wagmi/core/chains";
-import { injected, walletConnect } from "@wagmi/connectors";
+import { injected } from "@wagmi/connectors";
 
 import { Loading } from "../components/Loading";
 import { CONTRACT_ID } from "../constants";
@@ -99,19 +99,7 @@ const wagmiConfig: Config = createConfig({
   transports: {
     [near.id]: http(),
   },
-  connectors: [
-    walletConnect({
-      projectId,
-      metadata: {
-        name: "NEAR Guest Book",
-        description: "A guest book with comments stored on the NEAR blockchain",
-        url: "https://near.github.io/wallet-selector",
-        icons: ["https://near.github.io/wallet-selector/favicon.ico"],
-      },
-      showQrModal: false,
-    }),
-    injected({ shimDisconnect: true }),
-  ],
+  connectors: [injected({ shimDisconnect: true })],
 });
 reconnect(wagmiConfig);
 
