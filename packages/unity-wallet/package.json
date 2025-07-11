@@ -1,7 +1,7 @@
 {
-  "name": "@near-wallet-selector/ethereum-wallets",
-  "version": "1.0.0-alpha.26",
-  "description": "Ethereum wallets package for NEAR Wallet Selector.",
+  "name": "@near-wallet-selector/unity-wallet",
+  "version": "1.0.0",
+  "description": "Unity Wallet package for NEAR Wallet Selector.",
   "keywords": [
     "near",
     "blockchain",
@@ -11,9 +11,8 @@
     "near-blockchain",
     "wallet selector",
     "injected wallet",
-    "wallet connect",
-    "web3Modal",
-    "wagmi"
+    "sender wallet",
+    "unity wallet"
   ],
   "repository": {
     "type": "git",
@@ -22,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/near/wallet-selector/issues"
   },
-  "homepage": "https://github.com/near/wallet-selector/tree/main/packages/ethereum-wallets"
+  "homepage": "https://github.com/near/wallet-selector/tree/main/packages/unity-wallet",
+  "dependencies": {
+    "@near-wallet-selector/wallet-connect": "9.0.2"
+  }
 }
