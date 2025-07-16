@@ -1,6 +1,9 @@
 name: on release
 
-on: pull_request
+on:
+  push:
+    branches:
+      - ycg/test-kek-2  # Replace with your target branch
 
 jobs:
   publish-github-registry:
