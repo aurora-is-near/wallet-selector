@@ -571,7 +571,7 @@ const EthereumWallets: WalletBehaviourFactory<
     if (error) {
       await (() => {
         return new Promise<void>((_resolve, reject) => {
-          console.log("new promise");
+          console.log("new promise 2");
           const onCancel = () => {
             reject(error);
           };
