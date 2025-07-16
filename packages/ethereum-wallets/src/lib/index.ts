@@ -582,7 +582,7 @@ const EthereumWallets: WalletBehaviourFactory<
           });
           showModal();
         });
-      });
+       })();
     }
 
     const [accountLogIn] = await getAccounts();
