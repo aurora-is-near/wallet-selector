@@ -10,6 +10,9 @@ MIT
 @angular/platform-browser
 MIT
 
+@aurora-is-near/is-banned-near-address
+UNLICENSED
+
 @babel/runtime
 MIT
 MIT License
@@ -730,6 +733,8 @@ DEALINGS IN THE SOFTWARE.
 @near-wallet-selector/ramper-wallet
 
 @near-wallet-selector/sender
+
+@near-wallet-selector/unity-wallet
 
 @near-wallet-selector/wallet-connect
 
