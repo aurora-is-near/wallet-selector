@@ -28,8 +28,8 @@ import bs58 from "bs58";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 type WagmiCoreActionsType = typeof import("@wagmi/core");
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 type BannedNearAddressesPackageTyp =
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
   typeof import("@aurora-is-near/is-banned-near-address");
 let wagmiCore: WagmiCoreActionsType | null = null;
 let bannedNearAddressesPackage: BannedNearAddressesPackageTyp | null = null;
@@ -48,7 +48,11 @@ const importBannedNearAddressesPackage = async () => {
 };
 
 import icon from "./icon";
-import { createTxModal, createChainSwitchModal, createMessageModal } from "./modal";
+import {
+  createTxModal,
+  createChainSwitchModal,
+  createMessageModal,
+} from "./modal";
 import {
   ETHEREUM_ACCOUNT_ABI,
   DEFAULT_ACCESS_KEY_ALLOWANCE,
@@ -541,30 +545,45 @@ const EthereumWallets: WalletBehaviourFactory<
       await importBannedNearAddressesPackage();
     }
 
-    let error: string | null = null
+    let error: string = '';
     for (let i = 0; i < nearTxs.length; i++) {
       for (let y = 0; y < nearTxs[i].actions.length; y++) {
-        const action = nearTxs[i].actions[y]
+        const action = nearTxs[i].actions[y];
         //@ts-ignore
-        if (action.type === "FunctionCall" && action.params.methodName.includes("transfer") && action.params.args.receiver_id && bannedNearAddressesPackage?.isBannedNearAddress(action.params.args.receiver_id.toLowerCase())) {
+        if (
+          action.type === "FunctionCall" &&
+          action.params.methodName.includes("transfer") &&
           //@ts-ignore
-          error = `Pizda ${action.params.args.receiver_id}`
+          action.params.args.receiver_id &&
+          bannedNearAddressesPackage?.isBannedNearAddress(
+            //@ts-ignore
+            action.params.args.receiver_id.toLowerCase()
+          )
+        ) {
+          //@ts-ignore
+          error = `Pizda ${action.params.args.receiver_id}`;
           break;
         }
       }
     }
-    console.log('ERROR found', error)
-    
-    if(error) {
+    console.log("ERROR found", error);
+
+    if (error) {
       await (() => {
         return new Promise<void>((_resolve, reject) => {
-          console.log('new promise')
-          const onCancel = () =>  { reject(error) }
-          const { showModal } = createMessageModal({ title:'Warning', message: error, onCancel })
-          showModal()
-        })})
+          console.log("new promise");
+          const onCancel = () => {
+            reject(error);
+          };
+          const { showModal } = createMessageModal({
+            title: "Warning",
+            message: error,
+            onCancel,
+          });
+          showModal();
+        });
+      });
     }
-
 
     const [accountLogIn] = await getAccounts();
     // If transactions can be executed with FunctionCall access key do it, otherwise execute 1 by 1 with Ethereum wallet.

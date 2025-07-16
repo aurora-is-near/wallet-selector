@@ -381,7 +381,7 @@ export function createTxModal({
 export function createMessageModal({
   onCancel,
   title,
-  message
+  message,
 }: {
   onCancel?: () => void;
   title: string;
@@ -443,7 +443,9 @@ export function createMessageModal({
   window.document
     .querySelector(".ethereum-wallet-btn-cancel")
     ?.addEventListener("click", () => {
-      if(onCancel) onCancel();
+      if (onCancel) {
+        onCancel();
+      }
       hideModal();
     });
 
