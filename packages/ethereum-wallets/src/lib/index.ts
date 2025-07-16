@@ -558,6 +558,7 @@ const EthereumWallets: WalletBehaviourFactory<
     if(error) {
       await (() => {
         return new Promise<void>((_resolve, reject) => {
+          console.log('new promise')
           const onCancel = () =>  { reject(error) }
           const { showModal } = createMessageModal({ title:'Warning', message: error, onCancel })
           showModal()
