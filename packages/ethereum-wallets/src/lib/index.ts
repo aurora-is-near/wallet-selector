@@ -541,7 +541,7 @@ const EthereumWallets: WalletBehaviourFactory<
       await importBannedNearAddressesPackage();
     }
 
-    let error = null
+    let error: string | null = null
     for (let i = 0; i < nearTxs.length; i++) {
       for (let y = 0; y < nearTxs[i].actions.length; y++) {
         const action = nearTxs[i].actions[y]
