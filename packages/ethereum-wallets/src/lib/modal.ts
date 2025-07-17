@@ -387,7 +387,6 @@ export function createMessageModal({
   title: string;
   message: string;
 }) {
-  // Create a style element and append the CSS styles
   const styleElement = window.document.createElement("style");
   styleElement.textContent = modalStyles;
   window.document.head.appendChild(styleElement);
