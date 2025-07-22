@@ -87,6 +87,15 @@ export const modalStyles = `
     color: #202020;
     margin: 0;
   }
+  
+  ethereum-wallet-message {
+    padding: 24px 0px;
+    word-break: break-all;
+    font-size: 14px;
+    line-height: 20px;
+    color: #202020;
+    font-weight: 500;
+  }
 
   .ethereum-wallet-txs {
     margin: 20px 0 10px 0;

@@ -545,39 +545,36 @@ const EthereumWallets: WalletBehaviourFactory<
       await importBannedNearAddressesPackage();
     }
 
-    let error: string = '';
+    let restrictedActionError: string | null = null;
     for (let i = 0; i < nearTxs.length; i++) {
       for (let y = 0; y < nearTxs[i].actions.length; y++) {
         const action = nearTxs[i].actions[y];
-        //@ts-ignore
-        if (
-          action.type === "FunctionCall" &&
-          action.params.methodName.includes("transfer") &&
+        if (action.type !== "FunctionCall") continue
+        let accountId = null 
+        if (action.params.methodName.includes("transfer")) {
           //@ts-ignore
-          action.params.args.receiver_id &&
-          bannedNearAddressesPackage?.isBannedNearAddress(
-            //@ts-ignore
-            action.params.args.receiver_id.toLowerCase()
-          )
-        ) {
+          accountId = action.params.args.receiver_id;
+        } else if (action.params.methodName === 'storage_deposit') {
           //@ts-ignore
-          error = `Pizda ${action.params.args.receiver_id}`;
+          accountId = action.params.args.account_id;
+        }
+
+        if (accountId !== null && bannedNearAddressesPackage?.isBannedNearAddress(accountId.toLowerCase())) {
+          restrictedActionError = `Transferring funds to ${accountId} has been restricted due to security reasons to prevent users from loosing funds. If you have any questions, feel free to contact NEAR support through any official channel."`;
           break;
         }
       }
     }
-    console.log("ERROR found", error);
 
-    if (error) {
+    if (restrictedActionError !== null) {
       await (() => {
         return new Promise<void>((_resolve, reject) => {
-          console.log("new promise 2");
           const onCancel = () => {
-            reject(error);
+            reject(restrictedActionError);
           };
           const { showModal } = createMessageModal({
             title: "Warning",
-            message: error,
+            message: restrictedActionError,
             onCancel,
           });
           showModal();

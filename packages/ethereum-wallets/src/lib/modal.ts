@@ -414,7 +414,7 @@ export function createMessageModal({
   const modalContent = window.document.createElement("div");
   modalContent.classList.add("ethereum-wallet-modal-content");
   modalContent.innerHTML = `<h2>${title}</h2>
-    <div class="ethereum-wallet-message">${message}</div>
+    <p class="ethereum-wallet-message">${message}</p>
     <button class="ethereum-wallet-btn ethereum-wallet-btn-sm ethereum-wallet-btn-cancel">Cancel</button>
   `;
 
