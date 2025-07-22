@@ -29,7 +29,7 @@ import bs58 from "bs58";
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 type WagmiCoreActionsType = typeof import("@wagmi/core");
 type BannedNearAddressesPackageTyp =
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   typeof import("@aurora-is-near/is-banned-near-address");
 let wagmiCore: WagmiCoreActionsType | null = null;
 let bannedNearAddressesPackage: BannedNearAddressesPackageTyp | null = null;
@@ -549,18 +549,25 @@ const EthereumWallets: WalletBehaviourFactory<
     for (let i = 0; i < nearTxs.length; i++) {
       for (let y = 0; y < nearTxs[i].actions.length; y++) {
         const action = nearTxs[i].actions[y];
-        if (action.type !== "FunctionCall") continue
-        let accountId = null 
+        if (action.type !== "FunctionCall") {
+          continue;
+        }
+        let accountId = null;
         if (action.params.methodName.includes("transfer")) {
           //@ts-ignore
           accountId = action.params.args.receiver_id;
-        } else if (action.params.methodName === 'storage_deposit') {
+        } else if (action.params.methodName === "storage_deposit") {
           //@ts-ignore
           accountId = action.params.args.account_id;
         }
 
-        if (accountId !== null && bannedNearAddressesPackage?.isBannedNearAddress(accountId.toLowerCase())) {
-          restrictedActionError = `Transferring funds to ${accountId} has been restricted due to security reasons to prevent users from loosing funds. If you have any questions, feel free to contact NEAR support through any official channel."`;
+        if (
+          accountId !== null &&
+          bannedNearAddressesPackage?.isBannedNearAddress(
+            accountId.toLowerCase()
+          )
+        ) {
+          restrictedActionError = `Transferring funds to ${accountId} has been restricted due to security reasons in order to prevent users from losing funds. If you have any questions, feel free to contact NEAR Support through any official channel.`;
           break;
         }
       }
@@ -579,7 +586,7 @@ const EthereumWallets: WalletBehaviourFactory<
           });
           showModal();
         });
-       })();
+      })();
     }
 
     const [accountLogIn] = await getAccounts();
@@ -915,12 +922,7 @@ const EthereumWallets: WalletBehaviourFactory<
           logger.log("Wallet already connected");
         }
 
-        console.log(
-          "bannedNearAddressesPackage before",
-          bannedNearAddressesPackage
-        );
         if (bannedNearAddressesPackage === null) {
-          console.log("fetching");
           await importBannedNearAddressesPackage();
         }
 
@@ -931,11 +933,6 @@ const EthereumWallets: WalletBehaviourFactory<
             "Your Ethereum (ETH) address has been restricted from use on the NEAR network for security reasons. Please disconnect this address and connect a different one to continue. If you have any questions, feel free to contact NEAR support through any official channel."
           );
         }
-
-        console.log(
-          "bannedNearAddressesPackage after",
-          bannedNearAddressesPackage
-        );
 
         await switchChain();
 
