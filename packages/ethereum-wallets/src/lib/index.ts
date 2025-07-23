@@ -573,7 +573,7 @@ const EthereumWallets: WalletBehaviourFactory<
       }
     }
 
-    if (restrictedActionError !== null) {
+    if (typeof restrictedActionError === 'string') {
       await (() => {
         return new Promise<void>((_resolve, reject) => {
           const onCancel = () => {
