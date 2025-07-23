@@ -88,13 +88,13 @@ export const modalStyles = `
     margin: 0;
   }
   
-  ethereum-wallet-message {
-    padding: 24px 0px;
-    word-break: break-all;
+  .ethereum-wallet-message {
+    padding: 10px 0px 24px 0px;
+    text-align: center;
     font-size: 14px;
     line-height: 20px;
     color: #202020;
-    font-weight: 500;
+    font-weight: 400;
   }
 
   .ethereum-wallet-txs {

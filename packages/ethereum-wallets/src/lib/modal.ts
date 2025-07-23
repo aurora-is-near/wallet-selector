@@ -434,7 +434,7 @@ export function createMessageModal({
   modalContent.appendChild(modalMessage);
   modalContent.appendChild(cancelButton);
 
-  // // Append the elements to form the complete structure
+  // Append the elements to form the complete structure
   modalContentContainer.appendChild(modalContent);
   modalWrapper.appendChild(modalContentContainer);
   modalContainer.appendChild(backdrop);
