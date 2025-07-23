@@ -422,7 +422,9 @@ export function createMessageModal({
 
   const cancelButton = window.document.createElement("button");
   cancelButton.classList.add(
-    "ethereum-wallet-btn ethereum-wallet-btn-sm ethereum-wallet-btn-cancel"
+    "ethereum-wallet-btn",
+    "ethereum-wallet-btn-sm",
+    "ethereum-wallet-btn-cancel"
   );
   cancelButton.textContent = "Cancel";
 
