@@ -412,11 +412,25 @@ export function createMessageModal({
 
   // Modal content
   const modalContent = window.document.createElement("div");
+
+  const modalTitle = window.document.createElement("h2");
+  modalTitle.textContent = title;
+
+  const modalMessage = window.document.createElement("p");
+  modalMessage.classList.add("ethereum-wallet-message");
+  modalMessage.textContent = message;
+
+  const cancelButton = window.document.createElement("button");
+  cancelButton.classList.add(
+    "ethereum-wallet-btn ethereum-wallet-btn-sm ethereum-wallet-btn-cancel"
+  );
+  cancelButton.textContent = "Cancel";
+
+  modalContentContainer.classList.add("ethereum-wallet-modal-container");
   modalContent.classList.add("ethereum-wallet-modal-content");
-  modalContent.innerHTML = `<h2>${title}</h2>
-    <p class="ethereum-wallet-message">${message}</p>
-    <button class="ethereum-wallet-btn ethereum-wallet-btn-sm ethereum-wallet-btn-cancel">Cancel</button>
-  `;
+  modalContent.appendChild(modalTitle);
+  modalContent.appendChild(modalMessage);
+  modalContent.appendChild(cancelButton);
 
   // // Append the elements to form the complete structure
   modalContentContainer.appendChild(modalContent);
