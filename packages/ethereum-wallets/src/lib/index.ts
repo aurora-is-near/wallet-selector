@@ -545,7 +545,7 @@ const EthereumWallets: WalletBehaviourFactory<
       await importBannedNearAddressesPackage();
     }
 
-    let restrictedActionError: string | null = null;
+    let restrictedActionError = "";
     for (let i = 0; i < nearTxs.length; i++) {
       for (let y = 0; y < nearTxs[i].actions.length; y++) {
         const action = nearTxs[i].actions[y];
@@ -573,7 +573,7 @@ const EthereumWallets: WalletBehaviourFactory<
       }
     }
 
-    if (typeof restrictedActionError === 'string') {
+    if (restrictedActionError) {
       await (() => {
         return new Promise<void>((_resolve, reject) => {
           const onCancel = () => {
