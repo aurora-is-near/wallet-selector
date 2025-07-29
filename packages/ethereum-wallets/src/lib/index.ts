@@ -4,10 +4,10 @@ import type {
   ExecutionStatus,
   FinalExecutionOutcome,
   FunctionCallPermissionView,
-} from "near-api-js/lib/providers/provider";
-import { JsonRpcProvider } from "near-api-js/lib/providers";
-import { stringifyJsonOrBytes } from "near-api-js/lib/transaction";
-import { parseRpcError } from "near-api-js/lib/utils/rpc_errors";
+} from "near-api-js/lib/providers/provider.js";
+import { JsonRpcProvider } from "near-api-js/lib/providers/index.js";
+import { stringifyJsonOrBytes } from "near-api-js/lib/transaction.js";
+import { parseRpcError } from "near-api-js/lib/utils/rpc_errors.js";
 import {
   type WalletModuleFactory,
   type WalletBehaviourFactory,
@@ -28,11 +28,11 @@ import bs58 from "bs58";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 type WagmiCoreActionsType = typeof import("@wagmi/core");
-type BannedNearAddressesPackageTyp =
+type BannedNearAddressesPackageType =
   // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   typeof import("@aurora-is-near/is-banned-near-address");
 let wagmiCore: WagmiCoreActionsType | null = null;
-let bannedNearAddressesPackage: BannedNearAddressesPackageTyp | null = null;
+let bannedNearAddressesPackage: BannedNearAddressesPackageType | null = null;
 const importWagmiCore = async () => {
   // Commonjs support NA with @wagmi/core:
   // https://wagmi.sh/core/guides/migrate-from-v1-to-v2#dropped-commonjs-support
@@ -42,9 +42,17 @@ const importWagmiCore = async () => {
 };
 
 const importBannedNearAddressesPackage = async () => {
-  return import("@aurora-is-near/is-banned-near-address").then((module) => {
-    bannedNearAddressesPackage = module;
-  });
+  return import("@aurora-is-near/is-banned-near-address")
+    .then((module) => {
+      bannedNearAddressesPackage = module;
+    })
+    .catch((e) => {
+      // eslint-disable-next-line no-console
+      console.error(
+        "Failed to dynamically import @aurora-is-near/is-banned-near-address package :",
+        e
+      );
+    });
 };
 
 import icon from "./icon";
@@ -547,28 +555,37 @@ const EthereumWallets: WalletBehaviourFactory<
 
     let restrictedActionError = "";
     for (let i = 0; i < nearTxs.length; i++) {
-      for (let y = 0; y < nearTxs[i].actions.length; y++) {
-        const action = nearTxs[i].actions[y];
-        if (action.type !== "FunctionCall") {
-          continue;
-        }
-        let accountId = null;
-        if (action.params.methodName.includes("transfer")) {
-          //@ts-ignore
-          accountId = action.params.args.receiver_id;
-        } else if (action.params.methodName === "storage_deposit") {
-          //@ts-ignore
-          accountId = action.params.args.account_id;
-        }
-
-        if (
-          accountId !== null &&
-          bannedNearAddressesPackage?.isBannedNearAddress(
-            accountId.toLowerCase()
-          )
-        ) {
-          restrictedActionError = `Transferring funds to ${accountId} has been restricted due to security reasons in order to prevent users from losing funds. If you have any questions, feel free to contact NEAR Support through any official channel.`;
-          break;
+      const tx = nearTxs[i]
+      for (let y = 0; y < tx.actions.length; y++) {
+        try {
+          const action = tx.actions[y];
+          let accountId = null;
+          if (action.type === "Transfer") {
+            accountId = tx.receiverId
+          }else if (action.type === "FunctionCall") {
+            if (action.params.methodName.includes("transfer")) {
+              //@ts-ignore
+              accountId = action.params?.args?.receiver_id;
+            } else if (action.params.methodName === "storage_deposit") {
+              //@ts-ignore
+              accountId = action.params?.args?.account_id;
+            }
+          }
+            
+          if (
+            accountId &&
+            bannedNearAddressesPackage?.isBannedNearAddress(
+              accountId.toLowerCase()
+            )
+          ) {
+            restrictedActionError = `Transferring funds to ${accountId} has been restricted due to security reasons in order to prevent users from losing funds. If you have any questions, feel free to contact NEAR Support through any official channel.`;
+            break;
+          }
+        } catch {
+          // eslint-disable-next-line no-console
+          console.error(
+            "Failed to validate NEAR transactions for transfers to restricted addresses."
+          );
         }
       }
     }
@@ -1075,6 +1092,30 @@ const EthereumWallets: WalletBehaviourFactory<
 
     async signTransaction(transaction) {
       logger.log("EthereumWallets:signTransaction", { transaction });
+
+      throw new Error(`Method not supported by Ethereum Wallets`);
+    },
+
+    async getPublicKey() {
+      logger.log("getPublicKey", {});
+
+      throw new Error(`Method not supported by Ethereum Wallets`);
+    },
+
+    async signNep413Message(message, accountId, recipient, nonce, callbackUrl) {
+      logger.log("signNep413Message", {
+        message,
+        accountId,
+        recipient,
+        nonce,
+        callbackUrl,
+      });
+
+      throw new Error(`Method not supported by Ethereum Wallets`);
+    },
+
+    async signDelegateAction(delegateAction) {
+      logger.log("signDelegateAction", { delegateAction });
 
       throw new Error(`Method not supported by Ethereum Wallets`);
     },
